@@ -10,19 +10,4 @@ CORS(app)
 def mainRoute():
     return "hello world"
 
-@app.route('/testing', methods=['POST'])
-def testing():
-    data = request.data
-    print(data)
-    return {
-        'testing': 'something hm'
-    }
-
-@app.route('/something')
-def something():
-    return {
-        'something': 'something'
-    }
-
-
 app.run(debug=True)
