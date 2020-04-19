@@ -14,13 +14,13 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secretkey'
 socket = SocketIO(app, cors_allowed_origins='*')
 
-db = mariadb.connect(user='root', password='bigidea1', database='name')
+try:
+    db = mariadb.connect(user='sql3334414', password='Pyyhb6L2cr', database='sql3334414',host="sql3.freemysqlhosting.net")
+except:
+    print("ur db is fucked buddy")
+
 cursor = db.cursor()
 
-# cursor.execute("SELECT * FROM Users")
-
-# for userid, username, password in cursor:
-#     print(userid, username, password)
 
 """
 Message structure:
