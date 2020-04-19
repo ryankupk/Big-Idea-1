@@ -1,17 +1,26 @@
 #flask app
 import flask
 from flask_socketio import SocketIO, send
-from flask import Flask, json
+from flask import Flask, json, request, jsonify
 import datetime
+import pymysql as mariadb
+
+
 
 # x = datetime.datetime.now()
 # print(x)
 
-
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secretkey'
-socket = SocketIO(app, engineio_logger=True,logger=True, cors_allowed_origins='*')
+socket = SocketIO(app, cors_allowed_origins='*')
+
+db = mariadb.connect(user='root', password='bigidea1', database='name')
+cursor = db.cursor()
+
+# cursor.execute("SELECT * FROM Users")
+
+# for userid, username, password in cursor:
+#     print(userid, username, password)
 
 """
 Message structure:
@@ -33,17 +42,67 @@ json object:
 
 
 messages = [
-    {'date': '10/10/2020', 'sender': '😀😉😊😎', 'contents': '🎉🎫🖼👓🎀🎋💋💋💋💋'}#,
-    # {date: , sender: , contents: },
-    # {date: , sender: , contents: },
-    # {date: , sender: , contents: },
-    # {date: , sender: , contents: }
+    {'date': '10/10/2020', 'sender': '😀😉😊😎', 'contents': '🎉🎫🖼👓🎀🎋💋💋💋💋'}
 ]
 
 @app.route('/')
 def mainRoute():
     #actually nothing
     return "hello world"
+
+@app.route('/newuser', methods=['POST'])
+def handleNewUser():
+    params = request.json
+
+    success = {"user": "added"}
+    exists = {"error": "usernameExists"}
+    failure = {"error": "userCreationFailed"}
+
+    commmand = ""
+    try:
+        command = "SELECT COUNT(Username) AS count FROM Users WHERE Username = \"% s\""\
+            %(params["username"])
+
+        cursor.execute(command)
+    except:
+        return failure
+    
+    if cursor.fetchone()[0] > 0:
+        #username is taken
+        print("username taken")
+        return exists
+
+    try:
+        command = "INSERT INTO Users (Username, Password) VALUES (\"% s\", \"% s\")"\
+        %(params["username"], params["password"])
+        
+        cursor.execute(command)
+        db.commit()
+
+    except:
+        return failure
+    
+    return success
+
+@app.route('/authenticate', methods=['POST'])
+def authenticate():
+    params = request.json
+
+    failure = {"error": "couldNotAuthenticate"}
+
+    try:
+        command = "SELECT COUNT(UserID) FROM Users WHERE Username = \"% s\" AND Password = \"% s\""\
+            %(params["username"], params["password"])
+
+        cursor.execute(command)
+    except:
+        return failure
+    
+    if cursor.fetchone()[0] == 1:
+        return {"authenticated": 1}
+    
+    return {"authenticated": 0}
+
 
 @socket.on('connect')
 def handleConnection():
