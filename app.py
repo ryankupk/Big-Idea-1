@@ -4,13 +4,14 @@ from flask_socketio import SocketIO, send
 from flask import Flask, json, request, jsonify
 import datetime
 import pymysql as mariadb
-
+from flask_cors import CORS
 
 
 # x = datetime.datetime.now()
 # print(x)
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = 'secretkey'
 socket = SocketIO(app, cors_allowed_origins='*')
 
