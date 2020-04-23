@@ -1,6 +1,6 @@
 #flask app
 import flask
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO, emit, join_room, leave_room, send
 from flask import Flask, json, request, jsonify
 import datetime
 import pymysql as mariadb
@@ -11,9 +11,11 @@ from flask_cors import CORS
 # print(x)
 
 app = Flask(__name__)
-CORS(app)
-app.config['SECRET_KEY'] = 'secretkey'
-socket = SocketIO(app, cors_allowed_origins='*')
+app.config['SECRET_KEY'] = 'secret'
+cors = CORS(app,resources={r"/socket.io/*":{"origins":"*"}})
+socket = SocketIO(app)
+# socket = SocketIO(app=app, cors_allowed_origins='*')
+
 
 try:
     db = mariadb.connect(user='sql3334414', password='Pyyhb6L2cr', database='sql3334414',host="sql3.freemysqlhosting.net")
@@ -46,10 +48,20 @@ messages = [
     {'date': '10/10/2020', 'sender': '😀😉😊😎', 'contents': '🎉🎫🖼👓🎀🎋💋💋💋💋'}
 ]
 
-@app.route('/')
+@app.route('/', methods=['POST', 'GET'])
 def mainRoute():
     #actually nothing
-    return "hello world"
+    return jsonify({
+        'hello': 'world'
+    })
+
+
+@app.route('/testing', methods=['POST'])
+def testing():
+    print(request)
+    return ({
+        'hello': 'world'
+    })
 
 @app.route('/newuser', methods=['POST'])
 def handleNewUser():
@@ -108,7 +120,7 @@ def authenticate():
 @socket.on('connect')
 def handleConnection():
     print("connected")
-    socket.emit("user connected", broadcast=True)
+    socket.emit("user connected", 'user connected')
 
 # #receives json object with messages
 # @socket.on('json')
@@ -119,12 +131,10 @@ def handleConnection():
 
 @socket.on('message')
 def handleMessage(message):
-    print("message")
-    print(message)
-    socket.send(json.dumps(messages[0]), broadcast=True)
-
+    socket.emit('message', message)
+    
 
 if __name__ == "__main__":
     # app.run(debug=True)
     # socketio.run(app, host='0.0.0.0', port=5000)
-    socket.run(app, debug=True)
+    socket.run(app)
