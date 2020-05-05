@@ -4,21 +4,12 @@ var app = express();
 var fs = require("fs");
 var http = require("http").createServer(app);
 var bodyParser = require("body-parser");
-// var io = require("socket.io")(http);
 var io = require('socket.io')(http, { origins: '*:*'});
-var mysql = require('mysql');
-
-var connection = mysql.createConnection({
-  host : 'sql3.freemysqlhosting.net',
-  user : 'sql3334414',
-  password : 'Pyyhb6L2cr',
-  database : 'sql3334414'
-});
-
-connection.connect();
+var db = require('./db.js');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 app.get('/', (req, res)=>{
     res.send('hello world');
@@ -28,7 +19,7 @@ app.get('/', (req, res)=>{
 app.post('/newuser', (req, res) =>{
   var command = 'SELECT COUNT(*) AS isMatch FROM Users WHERE Username=?';
 
-  connection.query(command, [req.body.username], (error, results) =>{
+  db.query(command, [req.body.username], (error, results) =>{
     if(error) {
       console.log(error)
       res.send({'error': 'dbFailure'});
@@ -38,7 +29,7 @@ app.post('/newuser', (req, res) =>{
 
     else{
       command = 'INSERT INTO Users (Username, Password) VALUES (?, ?)'
-      connection.query(command, [req.body.username, req.body.password], (error) => {
+      db.query(command, [req.body.username, req.body.password], (error) => {
         if(error){
           console.log(error)
           res.send({'error': 'dbFailure'});
@@ -47,7 +38,7 @@ app.post('/newuser', (req, res) =>{
         else res.send({'success': 'userCreated'})
 
       })
-      connection.commit();
+      db.commit();
     }
   })
 });
@@ -56,7 +47,7 @@ app.post('/newuser', (req, res) =>{
 app.post('/authenticate', (req, res) =>{
   var command = 'SELECT COUNT(*) AS isMatch FROM Users WHERE Username=? AND Password=?';
 
-  connection.query(command, [req.body.username, req.body.password], (error, results) =>{
+  db.query(command, [req.body.username, req.body.password], (error, results) =>{
     if(error){
       console.log(error)
       res.send({'error': 'dbFailure'});
@@ -71,7 +62,7 @@ app.post('/authenticate', (req, res) =>{
 });
 
 
-io.on("connection", function (socket) {
+io.on("db", function (socket) {
     console.log('user connected');
 
     socket.on("disconnect", function () {
