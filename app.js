@@ -42,7 +42,7 @@ app.post('/createUser', (req, res) => {
             });
           } else {
             res.send({
-              message: 'User Succesfully Created.'
+              message: 'User Successfully Created.'
             });
           };
         });
