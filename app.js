@@ -68,14 +68,15 @@ app.post('/authenticate', (req, res) => {
 
   var searchUser = 'SELECT COUNT(*) AS isMatch FROM Users WHERE Username=? AND Password=?';
 
-  db.query(searchUser, [req.body.username, req.body.password], (err, results) => {
+  db.query(searchUser, [req.body.email, req.body.password], (err, results) => {
+    console.log(results[0]);
     if(err){
       //report db error
       res.status(400).send({
         message: err.message
       });
     }
-
+    
     else {
 
       if(results[0].isMatch){
@@ -87,7 +88,7 @@ app.post('/authenticate', (req, res) => {
       else{
         //otherwise authentication fails
         console.log("fail");
-        res.status(400).send({message: 'authentication failed'})
+        res.send({message: 'authentication failed'})
       }
   }
   })
