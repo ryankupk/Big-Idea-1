@@ -24,23 +24,29 @@ app.post('/createUser', (req, res) => {
   let searchUser = 'Select * from Users where Username = ?'
   db.query(searchUser, [req.body.email], (err, results) => {
     if(err){
+      //report errors on db query
       res.status(400).send({
         message: err.message
       });
     } else {
+      //if there are any results, user already exists
       if(results.length > 0){
+        //report error
         res.status(400).send({
           message: 'User already exists'
         });
-      } else {
+      } else { //if no db query error and no existing users under that email, create user
         let createUser = 'Insert into Users (UserID, Username, Password) values (?,?,?)';
         let timestamp = Date.now();
+        //query db with insertion of new user data
         db.query(createUser, [timestamp, req.body.email, req.body.password], (err, results) => {
           if(err){
+            //report query error
             res.status(400).send({
               message: err.message
             });
           } else {
+            //if successful, send success message
             res.send({
               message: 'User Successfully Created.'
             });
