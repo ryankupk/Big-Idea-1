@@ -28,14 +28,18 @@ app.post('/createUser', (req, res) => {
       res.status(400).send({
         message: err.message
       });
-    } else {
+    } 
+    
+    else {
       //if there are any results, user already exists
       if(results.length > 0){
         //report error
         res.status(400).send({
           message: 'User already exists'
         });
-      } else { //if no db query error and no existing users under that email, create user
+      } 
+      
+      else { //if no db query error and no existing users under that email, create user
         let createUser = 'Insert into Users (UserID, Username, Password) values (?,?,?)';
         let timestamp = Date.now();
         //query db with insertion of new user data
@@ -45,37 +49,48 @@ app.post('/createUser', (req, res) => {
             res.status(400).send({
               message: err.message
             });
-          } else {
+          } 
+          
+          else {
             //if successful, send success message
             res.send({
               message: 'User Successfully Created.'
             });
-          };
+          }
         });
-      };
-    };
+      }
+    }
   });
 });
 
 app.post('/authenticate', (req, res) => {
   console.log(req.body);
-  res.send({
-    'type': 'authenticate'
-  });
-  // var command = 'SELECT COUNT(*) AS isMatch FROM Users WHERE Username=? AND Password=?';
 
-  // db.query(command, [req.body.username, req.body.password], (error, results) => {
-  //   if(error){
-  //     console.log(error)
-  //     res.send({'error': 'dbFailure'});
-  //   }
-  //   else if(results[0].isMatch){
-  //     res.send({'authenticated': 1})
-  //   }
-  //   else{
-  //     res.send({'authenticated': 0})
-  //   }
-  // })
+  var searchUser = 'SELECT COUNT(*) AS isMatch FROM Users WHERE Username=? AND Password=?';
+
+  db.query(searchUser, [req.body.username, req.body.password], (err, results) => {
+    if(err){
+      //report db error
+      res.status(400).send({
+        message: err.message
+      });
+    }
+
+    else {
+
+      if(results[0].isMatch){
+        //if first element of query response is a match, authentication is successful
+        console.log("success");
+        res.send({message: 'authenticated'})
+      }
+
+      else{
+        //otherwise authentication fails
+        console.log("fail");
+        res.status(400).send({message: 'authentication failed'})
+      }
+  }
+  })
 });
 
 
