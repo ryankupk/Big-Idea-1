@@ -19,7 +19,7 @@ app.get('/', (req, res)=>{
 
 
 app.post('/createUser', (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
 
   let searchUser = 'Select * from Users where Username = ?'
   db.query(searchUser, [req.body.email], (err, results) => {
@@ -64,12 +64,12 @@ app.post('/createUser', (req, res) => {
 });
 
 app.post('/authenticate', (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
 
   var searchUser = 'SELECT COUNT(*) AS isMatch FROM Users WHERE Username=? AND Password=?';
 
   db.query(searchUser, [req.body.email, req.body.password], (err, results) => {
-    console.log(results[0]);
+    // console.log(results[0]);
     if(err){
       //report db error
       res.status(400).send({
@@ -81,13 +81,13 @@ app.post('/authenticate', (req, res) => {
 
       if(results[0].isMatch){
         //if first element of query response is a match, authentication is successful
-        console.log("success");
+        // console.log("success");
         res.send({message: 'authenticated'})
       }
 
       else{
         //otherwise authentication fails
-        console.log("fail");
+        // console.log("fail");
         res.send({message: 'authentication failed'})
       }
   }
@@ -109,6 +109,8 @@ app.post('/authenticate', (req, res) => {
 //     });
 //   });
 
-http.listen(3000, function () {
-    console.log("listening on port: 3000");
+const port = 3000;
+
+http.listen(port, function () {
+    console.log(`listening on port: ${port}`);
 });
